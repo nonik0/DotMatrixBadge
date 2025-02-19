@@ -1,8 +1,9 @@
 #![no_std]
 #![no_main]
 
+// TODO: implement watchdog?
+
 use panic_halt as _;
-mod hcms29xx;
 
 const NUM_CHARS: usize = 8;
 const MESSAGE: &[u8] = b"Stella and Beau and Stevie and Louie and ";
@@ -20,7 +21,7 @@ fn main() -> ! {
     pins.d9.into_floating_input();
     pins.d5.into_floating_input();
 
-    let mut display = hcms29xx::Hcms29xx::new(
+    let mut display = hcms_29xx::Hcms29xx::new(
         NUM_CHARS,                                // Number of characters in the display
         pins.d0.into_output().downgrade(),        // Data pin
         pins.d1.into_output().downgrade(),        // Clock pin

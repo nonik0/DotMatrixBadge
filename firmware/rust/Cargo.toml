@@ -1,7 +1,7 @@
 [package]
 name = "NONIK0"
 version = "0.1.0"
-authors = ["Nick Brown <nworbn@gmail.com>"]
+authors = ["Nick Brown <nick@altonimb.us>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
 
@@ -17,14 +17,16 @@ ufmt = "0.2.0"
 nb = "1.1.0"
 embedded-hal = "1.0"
 avr-device = { version = "0.7.0", features = ["rt"] }
-avr-progmem = "0.4.0"
+
+[dependencies.hcms-29xx]
+git = "https://github.com/nonik0/hcms-29xx"
+rev = "f88e4db59243e19c7f473ace028962ed8c9ae2ad"
 
 # TODO: split out feather impl into feature
 [dependencies.arduino-hal]
 git = "https://github.com/nonik0/avr-hal"
 branch = "feather-basic"
 features = ["feather-32u4"]
-#features = ["arduino-uno"]
 
 # The latest releases of `proc-macro2` do not support the rust toolchain that
 # we use.  Thus, we must fix this dependency to an older version where our
