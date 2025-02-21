@@ -19,8 +19,9 @@ embedded-hal = "1.0"
 avr-device = { version = "0.7.0", features = ["rt"] }
 
 [dependencies.hcms-29xx]
-git = "https://github.com/nonik0/hcms-29xx"
-rev = "f88e4db59243e19c7f473ace028962ed8c9ae2ad"
+path = "G:\\rust\\hcms-29xx"
+#git = "https://github.com/nonik0/hcms-29xx"
+#rev = "f88e4db59243e19c7f473ace028962ed8c9ae2ad"
 
 # TODO: split out feather impl into feature
 [dependencies.arduino-hal]

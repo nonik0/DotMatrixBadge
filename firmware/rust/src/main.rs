@@ -21,8 +21,7 @@ fn main() -> ! {
     pins.d9.into_floating_input();
     pins.d5.into_floating_input();
 
-    let mut display = hcms_29xx::Hcms29xx::new(
-        NUM_CHARS,                                // Number of characters in the display
+    let mut display = hcms_29xx::Hcms29xx::<_, NUM_CHARS>::new(
         pins.d0.into_output().downgrade(),        // Data pin
         pins.d1.into_output().downgrade(),        // Clock pin
         pins.d11.into_output().downgrade(),       // Chip select pin

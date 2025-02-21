@@ -160,7 +160,6 @@ checksum = "723dce4e9f25b6e6c5f35628e144794e5b459216ed7da97b7c4b66cdb3fa82ca"
 [[package]]
 name = "hcms-29xx"
 version = "0.1.0"
-source = "git+https://github.com/nonik0/hcms-29xx?rev=f88e4db59243e19c7f473ace028962ed8c9ae2ad#f88e4db59243e19c7f473ace028962ed8c9ae2ad"
 dependencies = [
  "avr-progmem",
  "embedded-hal 1.0.0",
