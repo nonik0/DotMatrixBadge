@@ -24,12 +24,12 @@ fn main() -> ! {
 
     let mut display = hcms_29xx::Hcms29xx::<_, _, _, _, _, _, _, NUM_CHARS>::new(
         pins.d0.into_output(),        // Data pin
-        pins.d1.into_output(),        // Clock pin
-        pins.d11.into_output(),       // Chip select pin
-        pins.d2.into_output(),        // Reset pin
-        Some(pins.d3.into_output()),  // Optional: Enable pin
-        Some(pins.d6.into_output()),  // Optional: Write pin
-        Some(pins.d10.into_output()), // Optional: Read pin
+        pins.d1.into_output(),        // RS pin
+        pins.d11.into_output(),       // Clock pin
+        pins.d2.into_output(),        // CE pin
+        Some(pins.d3.into_output()),  // Optional: Blank pin
+        Some(pins.d6.into_output()),  // Optional: OscSel pin
+        Some(pins.d10.into_output()), // Optional: Reset pin
     )
     .unwrap();
     display.begin().unwrap();
@@ -40,8 +40,6 @@ fn main() -> ! {
     // test max current/power draw
     // display.set_current(crate::hcms29xx::constants::control_word_0::current::MAX_12_8MA).unwrap();
     // display.set_brightness(crate::hcms29xx::constants::control_word_0::MAX_BRIGHTNESS).unwrap();
-
-
 
     let mut cursor: usize = 0;
     let mut count: i16 = 1000;
