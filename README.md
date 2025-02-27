@@ -15,10 +15,14 @@ The main hardware components are:
 
 The firmware is written in Rust and can be found in the [firmware/rust](firmware/rust) directory. As part of the work, I wrote a new [HCMS-29xx driver](https://github.com/nonik0/TODO) (TODO: split out from firmware) and forked avr-hal to add a Feather32u4 support, which I used for bootstrapping the HCMS-29xx driver work. There is also an older PlatformIO project targetting the Adafruit Feather in the [firmware/cpp](firmware/cpp) directory. TODO: pictures of prototype device
 
-
 ## Design Images
 
-TODO
+<p align="center" width="100%">
+  <img src="https://github.com/nonik0/NONIK0/blob/main/hardware/images/schematic.png" />
+  <img src="https://github.com/nonik0/NONIK0/blob/main/hardware/images/pcb_layout.png"/>
+  <img src="https://github.com/nonik0/NONIK0/blob/main/hardware/images/render_front.png" />
+  <img src="https://github.com/nonik0/NONIK0/blob/main/hardware/images/render_back.png" />
+</p>
 
 ## Work Left
 - order boards
