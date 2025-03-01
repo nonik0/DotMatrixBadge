@@ -6,8 +6,8 @@ version = 3
 name = "NONIK0"
 version = "0.1.0"
 dependencies = [
- "arduino-hal",
- "avr-device",
+ "avr-device 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "avrxmega-hal",
  "bitflags",
  "embedded-hal 1.0.0",
  "hcms-29xx",
@@ -18,35 +18,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "arduino-hal"
-version = "0.1.0"
-source = "git+https://github.com/nonik0/avr-hal?branch=feather-basic#c07fe9a16d218eb4089f21dabfe823b27d4888f5"
-dependencies = [
- "atmega-hal",
- "avr-device",
- "avr-hal-generic",
- "cfg-if",
- "embedded-hal 0.2.7",
- "embedded-hal 1.0.0",
- "ufmt",
-]
-
-[[package]]
-name = "atmega-hal"
-version = "0.1.0"
-source = "git+https://github.com/nonik0/avr-hal?branch=feather-basic#c07fe9a16d218eb4089f21dabfe823b27d4888f5"
-dependencies = [
- "avr-device",
- "avr-hal-generic",
-]
-
-[[package]]
 name = "avr-device"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "520f2031240156132bd83639d86aeb5b1907e6a228d9a4b44c3e9699827e6dae"
 dependencies = [
  "avr-device-macros",
+ "bare-metal",
+ "cfg-if",
+ "vcell",
+]
+
+[[package]]
+name = "avr-device"
+version = "0.7.0"
+source = "git+https://github.com/nonik0/avr-device#6d2b815be2a5087ab93e352943cd238c82407f6b"
+dependencies = [
  "bare-metal",
  "cfg-if",
  "vcell",
@@ -66,9 +53,9 @@ dependencies = [
 [[package]]
 name = "avr-hal-generic"
 version = "0.1.0"
-source = "git+https://github.com/nonik0/avr-hal?branch=feather-basic#c07fe9a16d218eb4089f21dabfe823b27d4888f5"
+source = "git+https://github.com/nonik0/avr-hal?branch=attiny204-804-1604#69588404afbb1c21d671229999a91d6f96d7cb2f"
 dependencies = [
- "avr-device",
+ "avr-device 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "embedded-hal 0.2.7",
  "embedded-hal 1.0.0",
  "embedded-hal-bus",
@@ -77,6 +64,15 @@ dependencies = [
  "paste",
  "ufmt",
  "unwrap-infallible",
+]
+
+[[package]]
+name = "avrxmega-hal"
+version = "0.1.0"
+source = "git+https://github.com/nonik0/avr-hal?branch=attiny204-804-1604#69588404afbb1c21d671229999a91d6f96d7cb2f"
+dependencies = [
+ "avr-device 0.7.0 (git+https://github.com/nonik0/avr-device)",
+ "avr-hal-generic",
 ]
 
 [[package]]

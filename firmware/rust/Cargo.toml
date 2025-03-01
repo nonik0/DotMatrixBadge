@@ -24,10 +24,10 @@ path = "G:\\rust\\hcms-29xx"
 #rev = "f88e4db59243e19c7f473ace028962ed8c9ae2ad"
 
 # TODO: split out feather impl into feature
-[dependencies.arduino-hal]
+[dependencies.avrxmega-hal]
 git = "https://github.com/nonik0/avr-hal"
-branch = "feather-basic"
-features = ["feather-32u4"]
+branch = "attiny204-804-1604"
+features = ["attiny1604"]
 
 # The latest releases of `proc-macro2` do not support the rust toolchain that
 # we use.  Thus, we must fix this dependency to an older version where our
