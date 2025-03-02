@@ -25,8 +25,9 @@ path = "G:\\rust\\hcms-29xx"
 
 # TODO: split out feather impl into feature
 [dependencies.avrxmega-hal]
-git = "https://github.com/nonik0/avr-hal"
-branch = "attiny204-804-1604"
+path = "G:\\rust\\avr-hal\\mcu\\avrxmega-hal"
+#git = "https://github.com/nonik0/avr-hal"
+#branch = "attiny204-804-1604"
 features = ["attiny1604"]
 
 # The latest releases of `proc-macro2` do not support the rust toolchain that
