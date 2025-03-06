@@ -9,42 +9,21 @@ const NUM_CHARS: usize = 8;
 const NUM_COLS: usize = hcms_29xx::CHAR_WIDTH * NUM_CHARS;
 const MESSAGE: &[u8] = b"Stella and Beau and Stevie and Louie and ";
 
-#[arduino_hal::entry]
+#[avrxmega_hal::entry]
 fn main() -> ! {
-    let dp = arduino_hal::Peripherals::take().unwrap();
-    let pins = arduino_hal::pins!(dp);
+    let dp = avrxmega_hal::Peripherals::take().unwrap();
+    let pins = avrxmega_hal::pins!(dp);
 
-    let mut led_pin = pins.d13.into_output();
-
-    // high impedance pins
-    pins.sck.into_floating_input();
-    pins.mosi.into_floating_input();
-    pins.d9.into_floating_input();
-    pins.d5.into_floating_input();
-
-    let mut display = if cfg!(feature = "feather-32u4") {
-        hcms_29xx::Hcms29xx::<_, _, _, _, _, _, _, NUM_CHARS>::new(
-            pins.d0.into_output(),        // Data pin
-            pins.d1.into_output(),        // RS pin
-            pins.d11.into_output(),       // Clock pin
-            pins.d2.into_output(),        // CE pin
-            Some(pins.d3.into_output()),  // Optional: Blank pin
-            Some(pins.d6.into_output()),  // Optional: OscSel pin
-            Some(pins.d10.into_output()), // Optional: Reset pin
-        )
-    } else {
-        hcms_29xx::Hcms29xx::<_, _, _, _, _, _, _, NUM_CHARS>::new(
-            pins.d4.into_output(),        // Data pin
-            pins.d5.into_output(),        // RS pin
-            pins.d6.into_output(),        // Clock pin
-            pins.d7.into_output(),        // CE pin
-            Some(pins.d8.into_output()),  // Optional: Blank pin
-            Some(pins.d9.into_output()),  // Optional: OscSel pin
-            Some(pins.d10.into_output()), // Optional: Reset pin
-        )
-    }
+    let mut display = hcms_29xx::Hcms29xx::<_, _, _, _, _, _, _, NUM_CHARS>::new(
+        pins.d0.into_output(),        // Data pin
+        pins.d1.into_output(),        // RS pin
+        pins.d11.into_output(),       // Clock pin
+        pins.d2.into_output(),        // CE pin
+        Some(pins.d3.into_output()),  // Optional: Blank pin
+        Some(pins.d6.into_output()),  // Optional: OscSel pin
+        Some(pins.d10.into_output()), // Optional: Reset pin
+    )
     .unwrap();
-
     display.begin().unwrap();
     display.display_unblank().unwrap();
     display.set_peak_current(hcms_29xx::PeakCurrent::Max6_4Ma).unwrap();
@@ -92,6 +71,6 @@ fn main() -> ! {
         // }
 
         // display.print_ascii_bytes(&buf).unwrap();
-        arduino_hal::delay_ms(1);
+        avrxmega_hal::delay_ms(1);
     }
 }

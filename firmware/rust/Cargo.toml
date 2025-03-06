@@ -19,16 +19,13 @@ embedded-hal = "1.0"
 avr-device = { version = "0.7.0", features = ["rt"] }
 
 [dependencies.hcms-29xx]
-path = "G:\\rust\\hcms-29xx"
-#git = "https://github.com/nonik0/hcms-29xx"
-#rev = "f88e4db59243e19c7f473ace028962ed8c9ae2ad"
+git = "https://github.com/nonik0/hcms-29xx"
+rev = "v0.1.0"
 
-# TODO: split out feather impl into feature
-[dependencies.avrxmega-hal]
-path = "G:\\rust\\avr-hal\\mcu\\avrxmega-hal"
-#git = "https://github.com/nonik0/avr-hal"
-#branch = "attiny204-804-1604"
-features = ["attiny1604"]
+[dependencies.arduino-hal]
+git = "https://github.com/nonik0/avr-hal"
+branch = "feather-basic"
+features = ["feather-32u4"]
 
 # The latest releases of `proc-macro2` do not support the rust toolchain that
 # we use.  Thus, we must fix this dependency to an older version where our

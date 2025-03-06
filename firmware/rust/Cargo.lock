@@ -6,8 +6,8 @@ version = 3
 name = "NONIK0"
 version = "0.1.0"
 dependencies = [
- "avr-device 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "avrxmega-hal",
+ "arduino-hal",
+ "avr-device",
  "bitflags",
  "embedded-hal 1.0.0",
  "hcms-29xx",
@@ -18,12 +18,26 @@ dependencies = [
 ]
 
 [[package]]
-name = "avr-device"
-version = "0.7.0"
+name = "arduino-hal"
+version = "0.1.0"
+source = "git+https://github.com/nonik0/avr-hal?branch=feather-basic#c07fe9a16d218eb4089f21dabfe823b27d4888f5"
 dependencies = [
- "bare-metal",
+ "atmega-hal",
+ "avr-device",
+ "avr-hal-generic",
  "cfg-if",
- "vcell",
+ "embedded-hal 0.2.7",
+ "embedded-hal 1.0.0",
+ "ufmt",
+]
+
+[[package]]
+name = "atmega-hal"
+version = "0.1.0"
+source = "git+https://github.com/nonik0/avr-hal?branch=feather-basic#c07fe9a16d218eb4089f21dabfe823b27d4888f5"
+dependencies = [
+ "avr-device",
+ "avr-hal-generic",
 ]
 
 [[package]]
@@ -52,8 +66,9 @@ dependencies = [
 [[package]]
 name = "avr-hal-generic"
 version = "0.1.0"
+source = "git+https://github.com/nonik0/avr-hal?branch=feather-basic#c07fe9a16d218eb4089f21dabfe823b27d4888f5"
 dependencies = [
- "avr-device 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "avr-device",
  "embedded-hal 0.2.7",
  "embedded-hal 1.0.0",
  "embedded-hal-bus",
@@ -62,14 +77,6 @@ dependencies = [
  "paste",
  "ufmt",
  "unwrap-infallible",
-]
-
-[[package]]
-name = "avrxmega-hal"
-version = "0.1.0"
-dependencies = [
- "avr-device 0.7.0",
- "avr-hal-generic",
 ]
 
 [[package]]
@@ -131,6 +138,7 @@ checksum = "723dce4e9f25b6e6c5f35628e144794e5b459216ed7da97b7c4b66cdb3fa82ca"
 [[package]]
 name = "hcms-29xx"
 version = "0.1.0"
+source = "git+https://github.com/nonik0/hcms-29xx?rev=v0.1.0#3e7a56865e27dc6cce36e534fc5c61ac8677d0fe"
 dependencies = [
  "embedded-hal 1.0.0",
 ]
