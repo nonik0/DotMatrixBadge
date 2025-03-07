@@ -17,7 +17,7 @@ const BASE_DELAY_MS: u16 = 100;
 const NUM_SKY_CHARS: usize = 4;
 const NUM_SKY_COLS: usize =
     NUM_SKY_CHARS * hcms_29xx::CHAR_WIDTH + (NUM_SKY_CHARS - 1) * COLUMN_GAP;
-const SKY_PERIOD: u8 = 4;
+const SKY_PERIOD: u8 = 7;
 
 const NUM_EARTH_CHARS: usize = 4;
 const NUM_EARTH_COLS: usize =
@@ -30,12 +30,20 @@ fn main() -> ! {
 
     let dp = arduino_hal::Peripherals::take().unwrap();
     let pins = arduino_hal::pins!(dp);
+    let mut adc = arduino_hal::Adc::new(dp.ADC, Default::default());
 
-    //let mut led_pin = pins.d13.into_output();
+    // read voltage from floating pin for reasonable entropy
+    let entropy_pin = pins.a0.into_analog_input(&mut adc);
+    let seed_value_1 = entropy_pin.analog_read(&mut adc);
+    let seed_value_2 = entropy_pin.analog_read(&mut adc);
+    let seed_value = (seed_value_1 as u32) << 16 | seed_value_2 as u32;
+    Rand::seed(seed_value);
 
     // high impedance pins
-    pins.sck.into_floating_input();
-    pins.mosi.into_floating_input();
+    //pins.sck.into_floating_input();
+    //pins.mosi.into_floating_input();
+    //pins.sck.into_floating_input();
+    //pins.mosi.into_floating_input();    
     pins.d9.into_floating_input();
     pins.d5.into_floating_input();
 
@@ -62,7 +70,7 @@ fn main() -> ! {
     let mut sky_count: u8 = 0;
     let mut earth_count: u8 = 0;
 
-    let mut sky_state = SkyState::new();
+    let mut sky_state = CloudState::new();
     let mut earth_state = MountainState::new();
 
     // fill display buffer with initial columns
@@ -109,44 +117,44 @@ fn main() -> ! {
     }
 }
 
-struct SkyState {
-    cloud_loc: u8,
-    cloud_gap: u8,
-    cloud_cur_length: u8,
-    cloud_height: u8,
-    cloud_length: u8,
+struct CloudState {
+    loc: u8,
+    gap: u8,
+    cur_length: u8,
+    height: u8,
+    length: u8,
 }
 
-impl SkyState {
+impl CloudState {
     fn new() -> Self {
-        SkyState {
-            cloud_loc: 0,
-            cloud_gap: 1,
-            cloud_cur_length: 0,
-            cloud_length: 0,
-            cloud_height: 0,
+        CloudState {
+            loc: 0,
+            gap: 1,
+            cur_length: 0,
+            length: 0,
+            height: 0,
         }
     }
 
-    fn update_sky(&mut self) {
+    fn next_cloud(&mut self) {
         let mut rng = Rand::default();
-        self.cloud_gap = rng.get_u8() % 10 + 1;
-        self.cloud_loc = rng.get_u8() % (NUM_ROWS as u8 - 2);
-        self.cloud_height = rng.get_u8() % 3 + 2;
-        self.cloud_length = rng.get_u8() % 10 + 5;
+        self.gap = rng.get_u8() % 10 + 1;
+        self.loc = 1 + rng.get_u8() % (NUM_ROWS as u8 - 2);
+        self.height = rng.get_u8() % 3 + 2;
+        self.length = rng.get_u8() % 10 + 5;
     }
 }
 
-fn generate_sky_column(state: &mut SkyState) -> u8 {
+fn generate_sky_column(state: &mut CloudState) -> u8 {
     // clouds are drawn as silhouettes, i.e. sky is on and cloud is off
     let mut col = 0b0111_1111;
 
-    if state.cloud_gap > 0 {
-        state.cloud_gap -= 1;
-    } else if state.cloud_cur_length < state.cloud_length {
+    if state.gap > 0 {
+        state.gap -= 1;
+    } else if state.cur_length < state.length {
         for i in 0..NUM_ROWS {
-            let bit = if (i as u8) >= state.cloud_loc
-                && (i as u8) < state.cloud_loc + state.cloud_height
+            let bit = if (i as u8) >= state.loc
+                && (i as u8) < state.loc + state.height
             {
                 0
             } else {
@@ -154,51 +162,69 @@ fn generate_sky_column(state: &mut SkyState) -> u8 {
             };
             col = col << 1 | bit;
         }
-        state.cloud_cur_length += 1;
+        state.cur_length += 1;
     } else {
-        state.cloud_cur_length = 0;
-        state.update_sky();
+        state.cur_length = 0;
+        state.next_cloud();
     }
 
     col
 }
 
 struct MountainState {
-    mountain_cur_height: u8,
-    mountain_height: u8,
-    mountain_increment: i8,
+    cur_height: u8,
+    cur_length: u8,
+    height: u8,
+    length: u8,
+    increment: i8,
 }
 
 impl MountainState {
     fn new() -> Self {
         MountainState {
-            mountain_cur_height: 0,
-            mountain_height: 7,
-            mountain_increment: 1,
+            cur_height: 0,
+            cur_length: 0,
+            height: 7,
+            length: 15,
+            increment: 1,
         }
     }
 
-    fn update_mountain(&mut self) {
+    fn next_mountain(&mut self) {
         let mut rng = Rand::default();
-        self.mountain_height = rng.get_u8() % 4 + 4;
+        self.height = rng.get_u8() % 4 + 4;
+        self.increment = 1;
     }
+
+    // fn next_mountain(&mut self) {
+    //     //const MIN_HEIGHT: u8 = 3;
+    //     //const MAX_HEIGHT: u8 = 7;
+    //     //let mut rng = Rand::default();
+    //     // self.cur_height remains the same
+    //     self.cur_length = self.cur_height;
+    //     //self.height = MIN_HEIGHT + rng.get_u8() % (MAX_HEIGHT - MIN_HEIGHT);
+    //     self.height = 5; //self.cur_height + rng.get_u8() % (MAX_HEIGHT - self.cur_height + 1); // mountain needs to match current height at least
+    //     self.length = 7; //self.height + 1 + rng.get_u8() % (self.height - 1); // length range: [height + 1, 2*height-1]
+    //     self.increment = 1;
+    // }
 }
 
 fn generate_mountain_column(state: &mut MountainState) -> u8 {
     // mountains are drawn as silhouettes, i.e. sky is on and mountain is off
     let mut col = 0b0000_0000;
-    for _ in 0..(hcms_29xx::CHAR_HEIGHT as u8 - state.mountain_cur_height) {
+    for _ in 0..(hcms_29xx::CHAR_HEIGHT as u8 - state.cur_height) {
         col = col << 1 | 1;
     }
 
-    state.mountain_cur_height = (state.mountain_cur_height as i8 + state.mountain_increment) as u8;
+    state.cur_height = (state.cur_height as i8 + state.increment) as u8;
+    state.cur_length += 1;
 
     // start new mountain
-    if state.mountain_cur_height == 0 && state.mountain_increment < 0 {
-        state.update_mountain();
-        state.mountain_increment *= -1;
-    } else if state.mountain_cur_height == state.mountain_height {
-        state.mountain_increment *= -1;
+    if state.cur_height == 0 && state.increment < 0 {
+    //if state.cur_length >= state.length {
+        state.next_mountain();
+    } else if state.cur_height >= state.height {
+        state.increment *= -1;
     }
 
     col
