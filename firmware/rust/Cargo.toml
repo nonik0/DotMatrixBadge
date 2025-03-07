@@ -14,9 +14,11 @@ bench = false
 avr-device = { version = "0.7.0", features = ["rt"] }
 embedded-hal = "1.0"
 heapless = "0.8.0"
+once_cell = { version = "1.20.3", default-features = false }
 nb = "1.1.0"
 panic-halt = "1.0.0"
 random-trait = "0.1.1"
+#static_cell = "2.1.0"
 ufmt = "0.2.0"
 
 [dependencies.hcms-29xx]

@@ -5,6 +5,7 @@ mod panic;
 mod random;
 
 use heapless::Vec;
+use random_trait::Random;
 
 const NUM_CHARS: usize = 8;
 const NUM_ROWS: usize = hcms_29xx::CHAR_HEIGHT;
@@ -24,6 +25,8 @@ const EARTH_PERIOD: u8 = 3;
 
 #[arduino_hal::entry]
 fn main() -> ! {
+    Random::seed(12345); // Initialize the RNG with a seed
+
     let dp = arduino_hal::Peripherals::take().unwrap();
     let pins = arduino_hal::pins!(dp);
 
@@ -105,8 +108,6 @@ fn main() -> ! {
     }
 }
 
-
-
 struct SkyState {
     cloud_loc: u8,
     cloud_gap: u8,
@@ -133,6 +134,13 @@ impl SkyState {
             cloud_length_index: 0,
         }
     }
+
+    fn update_cloud_properties(&mut self) {
+        self.cloud_gap = Random::default().gen() % 10 + 1;
+        self.cloud_loc = Random::default().gen() % (NUM_ROWS as u8 - 2);
+        self.cloud_height = Random::default().gen() % 3 + 2;
+        self.cloud_length = Random::default().gen() % 10 + 5;
+    }
 }
 
 fn generate_sky_column(state: &mut SkyState) -> u8 {
@@ -154,22 +162,8 @@ fn generate_sky_column(state: &mut SkyState) -> u8 {
         }
         state.cloud_cur_length += 1;
     } else {
-        const LOC_PATTERN: [u8; 11] = [1, 4, 3, 2, 1, 4, 3, 4, 2, 3, 1];
-        const HEIGHT_PATTERN: [u8; 5] = [2, 2, 3, 2, 3];
-        const LENGTH_PATTERN: [u8; 7] = [7, 12, 8, 10, 8, 13, 11];
-        const GAP_PATTERN: [u8; 3] = [3, 6, 9];
         state.cloud_cur_length = 0;
-        state.cloud_gap_index = (state.cloud_gap_index + 1) % GAP_PATTERN.len();
-        state.cloud_loc_index = (state.cloud_loc_index + 1) % LOC_PATTERN.len();
-        state.cloud_height_index = (state.cloud_height_index + 1) % HEIGHT_PATTERN.len();
-        state.cloud_length_index = (state.cloud_length_index + 1) % LENGTH_PATTERN.len();
-        state.cloud_gap = GAP_PATTERN[state.cloud_gap_index];
-        state.cloud_loc = LOC_PATTERN[state.cloud_loc_index];
-        state.cloud_height = HEIGHT_PATTERN[state.cloud_height_index];
-        state.cloud_length = LENGTH_PATTERN[state.cloud_length_index];
-        if state.cloud_height == 3 && state.cloud_loc == 4 {
-            state.cloud_loc = 3;
-        }
+        state.update_cloud_properties();
     }
 
     col
@@ -191,6 +185,10 @@ impl MountainState {
             mountain_increment: 1,
         }
     }
+
+    fn update_mountain_height(&mut self) {
+        self.mountain_height = Random::default().gen() % 4 + 4;
+    }
 }
 
 fn generate_mountain_column(state: &mut MountainState) -> u8 {
@@ -204,9 +202,7 @@ fn generate_mountain_column(state: &mut MountainState) -> u8 {
 
     // start new mountain
     if state.mountain_cur_height == 0 && state.mountain_increment < 0 {
-        const HEIGHT_PATTERN: [u8; 7] = [7, 5, 6, 6, 7, 4, 6];
-        state.mountain_index = (state.mountain_index + 1) % HEIGHT_PATTERN.len();
-        state.mountain_height = HEIGHT_PATTERN[state.mountain_index];
+        state.update_mountain_height();
         state.mountain_increment *= -1;
     } else if state.mountain_cur_height == state.mountain_height {
         state.mountain_increment *= -1;

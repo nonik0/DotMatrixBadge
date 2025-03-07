@@ -1,21 +1,27 @@
+use once_cell::unsync::OnceCell;
 use random_trait::Random;
 
+// zero-size type in front of the static cell
+pub struct Rand;
+static RNG_STATE: OnceCell<RngState> = OnceCell::new();
+
+impl Rand {
+    pub fn seed(seed: u32) {
+        RNG_STATE.set(RngState { value: seed, index: 0 }).expect("RNG already seeded");
+    }
+
+    pub fn default() -> &'static RngState {
+        RNG_STATE.get().expect("RNG not seeded")
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
-pub struct Rng {
+pub struct RngState {
     value: u32,
     index: usize,
 }
 
-impl Rng {
-    pub fn seed(seed: u32) -> Self {
-        Self {
-            value: seed,
-            index: 0,
-        }
-    }
-}
-
-impl Random for Rng {
+impl Random for RngState {
     type Error = ();
     fn try_fill_bytes(&mut self, buf: &mut [u8]) -> Result<(), Self::Error> {
         let mut rand_bytes = self.value.to_le_bytes();
