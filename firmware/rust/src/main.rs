@@ -5,6 +5,7 @@ mod panic;
 mod random;
 
 use heapless::Vec;
+use random::Rand;
 use random_trait::Random;
 
 const NUM_CHARS: usize = 8;
@@ -25,7 +26,7 @@ const EARTH_PERIOD: u8 = 3;
 
 #[arduino_hal::entry]
 fn main() -> ! {
-    Random::seed(12345); // Initialize the RNG with a seed
+    Rand::seed(12345); // Initialize the RNG with a seed
 
     let dp = arduino_hal::Peripherals::take().unwrap();
     let pins = arduino_hal::pins!(dp);
@@ -114,10 +115,6 @@ struct SkyState {
     cloud_cur_length: u8,
     cloud_height: u8,
     cloud_length: u8,
-    cloud_gap_index: usize,
-    cloud_loc_index: usize,
-    cloud_height_index: usize,
-    cloud_length_index: usize,
 }
 
 impl SkyState {
@@ -128,18 +125,15 @@ impl SkyState {
             cloud_cur_length: 0,
             cloud_length: 0,
             cloud_height: 0,
-            cloud_gap_index: 0,
-            cloud_loc_index: 0,
-            cloud_height_index: 0,
-            cloud_length_index: 0,
         }
     }
 
-    fn update_cloud_properties(&mut self) {
-        self.cloud_gap = Random::default().gen() % 10 + 1;
-        self.cloud_loc = Random::default().gen() % (NUM_ROWS as u8 - 2);
-        self.cloud_height = Random::default().gen() % 3 + 2;
-        self.cloud_length = Random::default().gen() % 10 + 5;
+    fn update_sky(&mut self) {
+        let mut rng = Rand::default();
+        self.cloud_gap = rng.get_u8() % 10 + 1;
+        self.cloud_loc = rng.get_u8() % (NUM_ROWS as u8 - 2);
+        self.cloud_height = rng.get_u8() % 3 + 2;
+        self.cloud_length = rng.get_u8() % 10 + 5;
     }
 }
 
@@ -163,7 +157,7 @@ fn generate_sky_column(state: &mut SkyState) -> u8 {
         state.cloud_cur_length += 1;
     } else {
         state.cloud_cur_length = 0;
-        state.update_cloud_properties();
+        state.update_sky();
     }
 
     col
@@ -173,21 +167,20 @@ struct MountainState {
     mountain_cur_height: u8,
     mountain_height: u8,
     mountain_increment: i8,
-    mountain_index: usize,
 }
 
 impl MountainState {
     fn new() -> Self {
         MountainState {
-            mountain_index: 0,
             mountain_cur_height: 0,
             mountain_height: 7,
             mountain_increment: 1,
         }
     }
 
-    fn update_mountain_height(&mut self) {
-        self.mountain_height = Random::default().gen() % 4 + 4;
+    fn update_mountain(&mut self) {
+        let mut rng = Rand::default();
+        self.mountain_height = rng.get_u8() % 4 + 4;
     }
 }
 
@@ -202,7 +195,7 @@ fn generate_mountain_column(state: &mut MountainState) -> u8 {
 
     // start new mountain
     if state.mountain_cur_height == 0 && state.mountain_increment < 0 {
-        state.update_mountain_height();
+        state.update_mountain();
         state.mountain_increment *= -1;
     } else if state.mountain_cur_height == state.mountain_height {
         state.mountain_increment *= -1;
