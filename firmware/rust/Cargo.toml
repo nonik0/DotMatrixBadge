@@ -11,12 +11,13 @@ test = false
 bench = false
 
 [dependencies]
-heapless = "0.8.0"
-panic-halt = "1.0.0"
-ufmt = "0.2.0"
-nb = "1.1.0"
-embedded-hal = "1.0"
 avr-device = { version = "0.7.0", features = ["rt"] }
+embedded-hal = "1.0"
+heapless = "0.8.0"
+nb = "1.1.0"
+panic-halt = "1.0.0"
+random-trait = "0.1.1"
+ufmt = "0.2.0"
 
 [dependencies.hcms-29xx]
 git = "https://github.com/nonik0/hcms-29xx"

@@ -2,7 +2,7 @@
 target = "avr-specs/avr-atmega32u4.json"
 
 [target.'cfg(target_arch = "avr")']
-runner = "avrdude -v -p m32u4 -cavr109 -P COM20 -Uflash:w:target/avr-atmega32u4/debug/NONIK0.elf:e"
+runner = "avrdude -v -p m32u4 -cavr109 -P COM19 -Uflash:w:target/avr-atmega32u4/debug/NONIK0.elf:e"
 
 [unstable]
 build-std = ["core"]

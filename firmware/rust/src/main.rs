@@ -2,23 +2,25 @@
 #![no_main]
 
 mod panic;
+mod random;
 
 use heapless::Vec;
 
 const NUM_CHARS: usize = 8;
 const NUM_ROWS: usize = hcms_29xx::CHAR_HEIGHT;
 const NUM_COLS: usize = hcms_29xx::CHAR_WIDTH * NUM_CHARS;
-const COLUMN_GAP: usize = 3; // number of "gap" columns between characters
+const COLUMN_GAP: usize = 2; // number of "gap" columns between characters
+const BASE_DELAY_MS: u16 = 100;
 
 const NUM_SKY_CHARS: usize = 4;
 const NUM_SKY_COLS: usize =
     NUM_SKY_CHARS * hcms_29xx::CHAR_WIDTH + (NUM_SKY_CHARS - 1) * COLUMN_GAP;
-const SKY_PERIOD: u8 = 12;
+const SKY_PERIOD: u8 = 4;
 
 const NUM_EARTH_CHARS: usize = 4;
 const NUM_EARTH_COLS: usize =
     NUM_EARTH_CHARS * hcms_29xx::CHAR_WIDTH + (NUM_EARTH_CHARS - 1) * COLUMN_GAP;
-const EARTH_PERIOD: u8 = 7;
+const EARTH_PERIOD: u8 = 3;
 
 #[arduino_hal::entry]
 fn main() -> ! {
@@ -50,38 +52,42 @@ fn main() -> ! {
         .set_peak_current(hcms_29xx::PeakCurrent::Max6_4Ma)
         .unwrap();
 
+    // col bits: msb+1 is bottom row, lsb is top row, i.e. 0b0111_1111 is all on
     let mut sky_cols: Vec<u8, NUM_SKY_COLS> = Vec::new();
     let mut earth_cols: Vec<u8, NUM_EARTH_COLS> = Vec::new();
     let mut sky_count: u8 = 0;
     let mut earth_count: u8 = 0;
 
     let mut sky_state = SkyState::new();
-    let mut earth_state = EarthState::new();
+    let mut earth_state = MountainState::new();
 
+    // fill display buffer with initial columns
     for _ in 0..NUM_SKY_COLS {
-        sky_cols.push(0).unwrap();
+        let new_sky_col = generate_sky_column(&mut sky_state);
+        sky_cols.push(new_sky_col).unwrap();
     }
     for _ in 0..NUM_EARTH_COLS {
-        earth_cols.push(0).unwrap();
+        let new_earth_col = generate_mountain_column(&mut earth_state);
+        earth_cols.push(new_earth_col).unwrap();
     }
 
+    // sky and mountains will update at different rates for parallax effect (embassy would be nice)
     loop {
-        sky_count += 1;
-        if sky_count >= SKY_PERIOD {
+        sky_count = (sky_count + 1) % SKY_PERIOD;
+        if sky_count == 0 {
             let new_sky_col = generate_sky_column(&mut sky_state);
             sky_cols.remove(0);
             sky_cols.push(new_sky_col).unwrap();
-            sky_count = 0;
         }
 
-        earth_count += 1;
-        if earth_count >= EARTH_PERIOD {
-            let new_earth_col = generate_earth_column(&mut earth_state);
+        earth_count = (earth_count + 1) % EARTH_PERIOD;
+        if earth_count == 0 {
+            let new_earth_col = generate_mountain_column(&mut earth_state);
             earth_cols.remove(0);
             earth_cols.push(new_earth_col).unwrap();
-            earth_count = 0;
         }
 
+        // TODO: can overlay both to display on single row of characters
         let mut cols: Vec<u8, NUM_COLS> = Vec::new();
         for (i, &col) in sky_cols.iter().enumerate() {
             if i % (hcms_29xx::CHAR_WIDTH + COLUMN_GAP) < hcms_29xx::CHAR_WIDTH {
@@ -95,11 +101,11 @@ fn main() -> ! {
         }
 
         display.print_cols(&cols).unwrap();
-        arduino_hal::delay_ms(15);
+        arduino_hal::delay_ms(BASE_DELAY_MS);
     }
 }
 
-// col bits: msb+1 is bottom row, lsb is top row
+
 
 struct SkyState {
     cloud_loc: u8,
@@ -130,7 +136,8 @@ impl SkyState {
 }
 
 fn generate_sky_column(state: &mut SkyState) -> u8 {
-    let mut col = 0b1111_1111;
+    // clouds are drawn as silhouettes, i.e. sky is on and cloud is off
+    let mut col = 0b0111_1111;
 
     if state.cloud_gap > 0 {
         state.cloud_gap -= 1;
@@ -168,16 +175,16 @@ fn generate_sky_column(state: &mut SkyState) -> u8 {
     col
 }
 
-struct EarthState {
+struct MountainState {
     mountain_cur_height: u8,
     mountain_height: u8,
     mountain_increment: i8,
     mountain_index: usize,
 }
 
-impl EarthState {
+impl MountainState {
     fn new() -> Self {
-        EarthState {
+        MountainState {
             mountain_index: 0,
             mountain_cur_height: 0,
             mountain_height: 7,
@@ -186,8 +193,8 @@ impl EarthState {
     }
 }
 
-fn generate_earth_column(state: &mut EarthState) -> u8 {
-    // actually drawing "sky" behind mountains
+fn generate_mountain_column(state: &mut MountainState) -> u8 {
+    // mountains are drawn as silhouettes, i.e. sky is on and mountain is off
     let mut col = 0b0000_0000;
     for _ in 0..(hcms_29xx::CHAR_HEIGHT as u8 - state.mountain_cur_height) {
         col = col << 1 | 1;
